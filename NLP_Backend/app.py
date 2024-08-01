@@ -15,7 +15,7 @@ import google.generativeai as genai
 import simplejson as json
 
 #run with python app.py not directly bcus it needs to run as a script for __name__ to be recognised
-#actually run with 'python -m flask --app app run' to be extra safe...otherwise it leads to unwanted behaviour
+#actually run with 'python -m flask --app app run' to be extra safe...otherwise it leads to unexpected behaviour
 app = Flask(__name__)
 CORS(app)
 
@@ -188,24 +188,21 @@ generation_config = {
 model = genai.GenerativeModel(
   model_name="gemini-1.5-flash",
   generation_config=generation_config,
-  system_instruction=""" 
-                1. You are Godrej AI, an artificial intelligence assistant created specifically for Godrej Consumer      Products Limited (GCPL). 
-                2. Your role is to provide information and assist with queries related to Godrej's products, financial performance, and company initiatives 
-                based on the data available in investor presentations and other documents. Please respond to the query using the following context, 
-                but do not mention analyzing documents or being an AI unless directly asked. Focus on providing relevant Godrej-specific information.
-
-                3.If any graphs can be made from the relevant information return the graph points.
-                4. Give the graph coordinates in python dictonary format format with the `X axis` ,`Y axis`,`label` as keys. 
-                5. The value of `X axis` key should be a list of `X co-ordinates` and value of `Y axis` should be list of `Y co-ordinates`.
-                6. Labels should be a list containing label of X and Y co-ordinates
-                7. Graph information should be inside ```Graph
-                8. All the keys in the dictonary for graphs should be enclosed in ""
-
+  system_instruction=
+            """ 
+                1. You are AskYourDocs AI, an artificial intelligence assistant/chatbot designed to help users interact with and understand their uploaded documents.
+                2. Your role is to provide information and assist with queries related to the content of the uploaded documents. Please focus on delivering accurate and relevant information based on the data provided.
+                3. If any graphs can be generated from the document content, return the graph points.
+                4. Provide graph coordinates in Python dictionary format with the keys `X axis`, `Y axis`, and `label`.
+                5. The `X axis` key should contain a list of X coordinates, and the `Y axis` key should contain a list of Y coordinates.
+                6. The `label` key should contain a list of labels corresponding to the X and Y coordinates.
+                7. Enclose graph information within triple backticks ```Graph.
+                8. Ensure all dictionary keys for graphs are enclosed in double quotes.
             """
 )
 
 PREDEFINED_PROMPT = """
-You are an AI assistant specializing in document analysis and information retrieval. Your task is to provide accurate, concise, and helpful responses based on the content extracted from various documents.
+You are an AI chatbot specializing in document analysis and information retrieval. Your task is to provide accurate, concise, and helpful responses based on the content extracted from various documents.
 
 Instructions:
 1. Carefully analyze the given context from the documents.
@@ -300,7 +297,7 @@ def chat():
 
                 Query: {query}
 
-                Please provide your response as Godrej AI:
+                Please provide your response as AskYourDocs AI:
                 """
 
                 response = chat_session.send_message(prompt)
@@ -325,7 +322,7 @@ def chat():
                 })
 
             else:
-                return jsonify({"response": "I apologize, but I couldn't find any relevant information about that in Godrej's documents. Is there something else about Godrej I can help you with?", "references": []})
+                return jsonify({"response": "I apologize, but I couldn't find any relevant information about that in the uploaded documents. Is there something else I can help you with?", "references": []})
 
         except Exception as e:
             return jsonify({"error": str(e)}), 500
