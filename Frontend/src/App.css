@@ -1,0 +1,18 @@
+.green{
+    color: rgb(131,182,77);
+}
+.pink{
+    color: rgba(193,41,110,255)
+}
+.blue{
+    color: rgba(69,169,223,255)
+}
+.bggreen{
+    color: rgb(131,182,77);
+}
+.bgpink{
+    color: rgb(243, 101, 165)
+}
+.bgblue{
+    color: rgba(69,169,223,255)
+}

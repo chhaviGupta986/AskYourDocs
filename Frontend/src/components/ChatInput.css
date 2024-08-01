@@ -1,0 +1,22 @@
+/* Add this to your global CSS or component-specific CSS */
+.cursor-pointer {
+    cursor: pointer;
+  }
+
+  .offcanvas-header-custom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: white; /* Or the desired background color */
+    padding: 1rem;
+  }
+  
+  .close-button-custom {
+    color: white;
+    font-size: 1.5rem;
+    padding: 0;
+    border: none;
+    background: none;
+    margin-left: auto; /* Ensures the button is pushed to the right */
+  }
+  
