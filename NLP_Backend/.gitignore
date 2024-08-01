@@ -1,0 +1,15 @@
+#virtual environment
+.venv/
+
+#mac os files
+.DS_Store
+.DS_Store?
+
+# Environment variables
+.env
+
+bin
+lib
+lib64
+pyvenv.cfg
+include

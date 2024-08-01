@@ -1,0 +1,10 @@
+flask
+flask_cors 
+python-dotenv 
+google-generativeai 
+pdfplumber 
+python-docx 
+python-pptx 
+numpy
+simplejson
+gunicorn
