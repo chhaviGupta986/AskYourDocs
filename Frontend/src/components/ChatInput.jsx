@@ -34,8 +34,8 @@ function ChatInput({ onSendMessage, onFileUpload }) {
     try {
       setUploading(true);
       setUploadProgress(0);
-      // const response = await axios.post('https://crusaders-llm.onrender.com/chat', formData, {
-      const response = await axios.post('http://127.0.0.1:5000/chat', formData, {
+      const response = await axios.post('https://askyourdocs.onrender.com/chat', formData, {
+      // const response = await axios.post('http://127.0.0.1:5000/chat', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -77,8 +77,8 @@ function ChatInput({ onSendMessage, onFileUpload }) {
     } else if (message.trim()) {
       try {
         setIsSending(true);
-        // const response = await axios.post('https://crusaders-llm.onrender.com/chat', {
-        const response = await axios.post('http://127.0.0.1:5000/chat', {
+        const response = await axios.post('https://askyourdocs.onrender.com/chat', {
+        // const response = await axios.post('http://127.0.0.1:5000/chat', {
           query: message
         });
 
