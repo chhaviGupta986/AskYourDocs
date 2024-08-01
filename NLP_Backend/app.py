@@ -297,7 +297,7 @@ def chat():
 
                 Query: {query}
 
-                Please provide your response as AskYourDocs AI:
+                
                 """
 
                 response = chat_session.send_message(prompt)
