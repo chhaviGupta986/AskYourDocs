@@ -55,7 +55,8 @@ function App() {
     setResetTrigger(prev => prev + 1);
 
     try {
-    await axios.post('http://127.0.0.1:5000/reset');
+    await axios.post('https://askyourdocs.onrender.com/reset');
+    // await axios.post('http://127.0.0.1:5000/reset');
     } 
   catch (err) {
     console.error("Error resetting backend:", err);

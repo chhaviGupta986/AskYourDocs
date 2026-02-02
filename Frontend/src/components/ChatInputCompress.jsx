@@ -332,7 +332,8 @@ function ChatInput({ onSendMessage }) {
 
     try {
       console.log("111 formdata=",formData)
-      const response = await axios.post('http://127.0.0.1:5000/upload', formData, {
+      const response = await axios.post('https://askyourdocs.onrender.com/upload', formData, {
+      // const response = await axios.post('http://127.0.0.1:5000/upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         },
