@@ -6,6 +6,7 @@ import ChatInput from './components/ChatInput';
 import ChatMessage from './components/ChatMessage';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import axios from 'axios';
 
 function App() {
   const defaultMessage = {
@@ -24,6 +25,7 @@ function App() {
     const savedFiles = localStorage.getItem('uploadedFiles');
     return savedFiles ? JSON.parse(savedFiles) : [];
   });
+  const [resetTrigger, setResetTrigger] = React.useState(0); // ← HERE
   const messagesEndRef = React.useRef(null);
 
   const toggleSidebar = () => setShowSidebar(!showSidebar);
@@ -43,11 +45,21 @@ function App() {
     localStorage.setItem('uploadedFiles', JSON.stringify(fileNames));
   };
 
-  const handleNewChat = () => {
+  const handleNewChat = async () => {
     setMessages([defaultMessage]);
     setUploadedFileNames([]);
+    
     localStorage.removeItem('chatMessages');
     localStorage.removeItem('uploadedFiles');
+    // Notify ChatInput to reset its internal state
+    setResetTrigger(prev => prev + 1);
+
+    try {
+    await axios.post('http://127.0.0.1:5000/reset');
+    } 
+  catch (err) {
+    console.error("Error resetting backend:", err);
+  }
   };
 
   React.useEffect(() => {
@@ -98,7 +110,7 @@ function App() {
               <div ref={messagesEndRef} />
             </div>
             
-            <ChatInput onSendMessage={handleSendMessage} onFileUpload={handleFileUpload} />
+            <ChatInput onSendMessage={handleSendMessage} onFileUpload={handleFileUpload} resetTrigger={resetTrigger} />
           </Col>
         </Row>
       </Container>

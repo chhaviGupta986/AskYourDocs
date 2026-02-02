@@ -6,7 +6,7 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-function ChatInput({ onSendMessage, onFileUpload }) {
+function ChatInput({ onSendMessage, onFileUpload, resetTrigger }) {
   const [message, setMessage] = useState('');
   const [files, setFiles] = useState([]);
   const [uploading, setUploading] = useState(false);
@@ -14,6 +14,14 @@ function ChatInput({ onSendMessage, onFileUpload }) {
   const [fileUploaded, setFileUploaded] = useState(false);
   const [isSending, setIsSending] = useState(false);
 
+  // Reset internal state whenever a new chat is triggered
+  React.useEffect(() => {
+    setMessage('');
+    setFiles([]);
+    setFileUploaded(false);
+    setUploading(false);
+    setIsSending(false);
+  }, [resetTrigger]);
   const handleFileChange = (e) => {
     const selectedFiles = Array.from(e.target.files);
     setFiles(prevFiles => [...prevFiles, ...selectedFiles]);
@@ -77,8 +85,8 @@ function ChatInput({ onSendMessage, onFileUpload }) {
     } else if (message.trim()) {
       try {
         setIsSending(true);
-        const response = await axios.post('https://askyourdocs.onrender.com/chat', {
-        // const response = await axios.post('http://127.0.0.1:5000/chat', {
+        // const response = await axios.post('https://askyourdocs.onrender.com/chat', {
+        const response = await axios.post('http://127.0.0.1:5000/chat', {
           query: message
         });
 
@@ -145,14 +153,29 @@ function ChatInput({ onSendMessage, onFileUpload }) {
                 onChange={handleFileChange}
                 className="d-none"
               />
-              <Button
+              {/* <Button
                 style={{ backgroundColor: '#5276AA', borderWidth: '0px' }}
                 type="submit"
                 className="px-2"
                 disabled={uploading || (!fileUploaded && files.length === 0) || isSending}
               >
                 {uploading || isSending ? <Spinner animation="border" size="sm" /> : <Send size={20} />}
-              </Button>
+              </Button> */}
+              <Button
+              style={{ backgroundColor: '#5276AA', borderWidth: '0px' }}
+              type="submit"
+              className="px-2"
+              disabled={uploading || (!fileUploaded && files.length === 0) || isSending}
+            >
+              {uploading || isSending ? (
+                <Spinner animation="border" size="sm" />
+              ) : !fileUploaded ? (
+                "Upload Files"
+              ) : (
+                <Send size={20} />
+              )}
+            </Button>
+
             </InputGroup>
           </Form>
         </Col>

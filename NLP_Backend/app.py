@@ -26,13 +26,13 @@ if not os.path.exists(app.config['UPLOAD_FOLDER']):
     os.makedirs(app.config['UPLOAD_FOLDER'])
 
 GEMINI_API_KEY=os.getenv("GEMINI_API_KEY")
-print(GEMINI_API_KEY)
+# print(GEMINI_API_KEY)
 # Configure Generative AI model
 # genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 genai.configure(api_key=GEMINI_API_KEY)
 
 HF_API_TOKEN = os.getenv("HUGGING_FACE_API_TOKEN")
-print(HF_API_TOKEN)
+# print(HF_API_TOKEN)
 
 
 rag_instance = None
@@ -113,9 +113,13 @@ class RAG:
     def __init__(self, text_with_refs: List[Tuple[str, List[str], str]]):
         self.chunks_with_refs = self.split_text(text_with_refs)
         self.chunks = [chunk for chunk, _, _ in self.chunks_with_refs]
-        self.embeddings = self.get_embeddings(self.chunks)
+        self.embeddings = self.get_embeddings(self.chunks,task_type="retrieval_document")
         self.references = [file for _, _, file in self.chunks_with_refs]
-
+    def clear(self):
+        self.chunks = []
+        self.embeddings = []
+        self.chunks_with_refs=[]
+        self.references=[]
     def split_text(self, text_with_refs: List[Tuple[str, List[str], str]], chunk_size: int = 200) -> List[Tuple[str, List[str], str]]:
         chunks_with_refs = []
         for text, ref, file in text_with_refs:
@@ -137,19 +141,31 @@ class RAG:
                 chunks_with_refs.append((' '.join(current_chunk), current_pages, file))
         return chunks_with_refs
 
-    def get_embeddings(self, texts: List[str]) -> List[List[float]]:
-        API_URL = "https://api-inference.huggingface.co/pipeline/feature-extraction/sentence-transformers/all-MiniLM-L6-v2"
-        # API_URL = "https://api-inference.huggingface.co/models/sentence-transformers/all-MiniLM-L6-v2"
-        headers = {"Authorization": f"Bearer {HF_API_TOKEN}"}
+    # def get_embeddings(self, texts: List[str]) -> List[List[float]]:
+    #     API_URL = "https://api-inference.huggingface.co/pipeline/feature-extraction/sentence-transformers/all-MiniLM-L6-v2"
+    #     # API_URL = "https://api-inference.huggingface.co/models/sentence-transformers/all-MiniLM-L6-v2"
+    #     headers = {"Authorization": f"Bearer {HF_API_TOKEN}"}
         
-        response = requests.post(API_URL, headers=headers, json={"inputs": texts})
-        response.raise_for_status()
-        return response.json()
+    #     response = requests.post(API_URL, headers=headers, json={"inputs": texts})
+    #     response.raise_for_status()
+    #     return response.json()
 
+    def get_embeddings(self, texts: List[str], task_type:str) -> List[List[float]]:
+        embeddings = []
+
+        for text in texts:
+            response = genai.embed_content(
+                model="models/text-embedding-004",
+                content=text,
+                task_type=task_type
+            )
+            embeddings.append(response["embedding"])
+
+        return embeddings
     
 
     def retrieve(self, query: str, k: int = 3) -> List[Tuple[str, List[str], str]]:
-        query_embedding = self.get_embeddings([query])[0]
+        query_embedding = self.get_embeddings([query],task_type="retrieval_query")[0]
         similarities = [cosine_similarity(query_embedding, chunk_embedding) for chunk_embedding in self.embeddings]
         top_k_indices = np.argsort(similarities)[-k:][::-1]
         return [self.chunks_with_refs[i] for i in top_k_indices]
@@ -186,7 +202,7 @@ generation_config = {
 }
 
 model = genai.GenerativeModel(
-  model_name="gemini-1.5-flash",
+  model_name="gemini-2.5-flash",
   generation_config=generation_config,
   system_instruction=
             """ 
@@ -221,6 +237,13 @@ User's query: {query}
 
 Please provide your response based on these instructions:
 """
+@app.route('/reset', methods=['POST'])
+def reset_session():
+    print("entered reset")
+    global rag_instance, conversation_history
+    rag_instance = None
+    conversation_history = None
+    return jsonify({"message": "Chat session reset successfully."})
 
 @app.route('/chat', methods=['POST'])
 def chat():
@@ -325,6 +348,7 @@ def chat():
                 return jsonify({"response": "I apologize, but I couldn't find any relevant information about that in the uploaded documents. Is there something else I can help you with?", "references": []})
 
         except Exception as e:
+            print(e)
             return jsonify({"error": str(e)}), 500
 
     else:
